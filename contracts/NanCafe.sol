@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.21;
+pragma solidity >=0.8.21 <0.9.0;
 
 import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
 contract NanCafe is ERC721A, Pausable, Ownable {
+    // Different types of whitelist mint
     enum whitelistType {
         POTLIST,
         WHITELIST,
@@ -14,7 +15,9 @@ contract NanCafe is ERC721A, Pausable, Ownable {
     }
 
     bool public transfersPaused = false;
+    bool public revealed = false;
 
+    string public unrevealedUri;
     string public uriSuffix;
     string public baseUri;
     uint256 public maxSupply;
@@ -29,6 +32,8 @@ contract NanCafe is ERC721A, Pausable, Ownable {
     bytes32 public merkleRootCupzlist;
 
     mapping(address => uint256) public mintedTokens;
+
+    // Blocked marketplaces
     mapping(address => bool) public blockedOperators;
 
     modifier whitelistCompliance(
@@ -38,6 +43,7 @@ contract NanCafe is ERC721A, Pausable, Ownable {
         bytes32 node = keccak256(abi.encodePacked(msg.sender));
         bytes32 merkleRoot;
 
+        // Assign merkleRoot depending on whitelist type provided by user
         if (mintType == whitelistType.POTLIST) {
             merkleRoot = merkleRootPotlist;
         } else if (mintType == whitelistType.WHITELIST) {
@@ -58,6 +64,7 @@ contract NanCafe is ERC721A, Pausable, Ownable {
 
         uint256 maxPerWallet = 0;
 
+        // Assign maxPerWallet depending on whitelist type provided by user
         if (mintType == whitelistType.POTLIST) {
             maxPerWallet = maxPerWalletPotlist;
         } else if (mintType == whitelistType.WHITELIST) {
@@ -81,6 +88,7 @@ contract NanCafe is ERC721A, Pausable, Ownable {
         bytes32 _merkleRootCupzlist,
         string memory _baseUri,
         string memory _uriSuffix,
+        string memory _unrevealedUri,
         uint256 _maxSupply
     ) ERC721A(_tokenName, _tokenSymbol) {
         pause();
@@ -92,16 +100,19 @@ contract NanCafe is ERC721A, Pausable, Ownable {
         merkleRootCupzlist = _merkleRootCupzlist;
         baseUri = _baseUri;
         uriSuffix = _uriSuffix;
+        unrevealedUri = _unrevealedUri;
         maxSupply = _maxSupply;
     }
 
+    // Whitelist mint funciton
     function whitelistMint(
         uint256 quantity,
-        whitelistType mintType,
-        bytes32[] calldata _merkleProof
+        whitelistType mintType, // Mint type: 0 - Potlist, 1 - Whitelist, 2 - Cupzlist
+        bytes32[] calldata _merkleProof // Merkle proof for a corresponding mint type
     )
         external
         payable
+        whenNotPaused // Check if mint is paused
         whitelistCompliance(_merkleProof, mintType)
         mintCompliance(quantity, mintType)
     {
@@ -118,6 +129,7 @@ contract NanCafe is ERC721A, Pausable, Ownable {
         uriSuffix = _uriSuffix;
     }
 
+    // Update max per wallet per allowlist value
     function setMaxPerWalletPotlist(uint256 _maxPerWallet) external onlyOwner {
         maxPerWalletPotlist = _maxPerWallet;
     }
@@ -132,6 +144,7 @@ contract NanCafe is ERC721A, Pausable, Ownable {
         maxPerWalletCupzlist = _maxPerWallet;
     }
 
+    // Update merkel roots for allowlists
     function setMerkleRootPotlist(bytes32 _merkleRoot) external onlyOwner {
         merkleRootPotlist = _merkleRoot;
     }
@@ -144,14 +157,21 @@ contract NanCafe is ERC721A, Pausable, Ownable {
         merkleRootCupzlist = _merkleRoot;
     }
 
+    // Pause token transfers
     function setTransfersPaused(bool _setPause) public onlyOwner {
         transfersPaused = _setPause;
     }
 
+    // Blocking marketplaces
     function blockOperator(address _address) external onlyOwner {
         blockedOperators[_address] = true;
     }
 
+    function unblockOperator(address _address) external onlyOwner {
+        blockedOperators[_address] = false;
+    }
+
+    // Owner airdrop mint
     function airdropMint(
         address _address,
         uint256 quantity
@@ -159,6 +179,7 @@ contract NanCafe is ERC721A, Pausable, Ownable {
         _mint(_address, quantity);
     }
 
+    // Pause mint process
     function pause() public onlyOwner {
         _pause();
     }
@@ -167,12 +188,21 @@ contract NanCafe is ERC721A, Pausable, Ownable {
         _unpause();
     }
 
+    // Change mint reveal status
+    function setRevealStatus(bool _status) public onlyOwner {
+        revealed = _status;
+    }
+
     // OVERRIDES
 
     function tokenURI(
         uint256 _tokenId
     ) public view virtual override returns (string memory) {
         if (!_exists(_tokenId)) revert URIQueryForNonexistentToken();
+        if (!revealed) {
+            return unrevealedUri;
+        }
+
         string memory baseURI = _baseURI();
 
         return
@@ -181,15 +211,6 @@ contract NanCafe is ERC721A, Pausable, Ownable {
                     abi.encodePacked(baseURI, _toString(_tokenId), uriSuffix)
                 )
                 : "";
-    }
-
-    function _beforeTokenTransfers(
-        address from,
-        address to,
-        uint256 tokenId,
-        uint256 batchSize
-    ) internal override whenNotPaused {
-        super._beforeTokenTransfers(from, to, tokenId, batchSize);
     }
 
     function safeTransferFrom(
