@@ -87,6 +87,7 @@ describe("NanCafe", function () {
       getMerkelRoot(allowlists.cupzlist.wallets),
       "https://example.com/",
       ".json",
+      "https://google.com/",
       737
     );
   });
