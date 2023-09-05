@@ -1,15 +1,19 @@
+import cupzlist from "./lists/cupzlist.json";
+import potlist from "./lists/potlist.json";
+import whitelist from "./lists/whitelist.json";
+
 const allowlists = {
   potlist: {
     amount: 3,
-    wallets: ["0x4E5D483c80501698d113251a09B6ed33cbE88980"],
+    wallets: potlist,
   },
   whitelist: {
     amount: 2,
-    wallets: ["0x4E5D483c80501698d113251a09B6ed33cbE88980"],
+    wallets: whitelist,
   },
   cupzlist: {
     amount: 1,
-    wallets: ["0x4E5D483c80501698d113251a09B6ed33cbE88980"],
+    wallets: cupzlist,
   },
 };
 

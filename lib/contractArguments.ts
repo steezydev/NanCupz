@@ -10,8 +10,8 @@ function getMerkelRoot(addresses: string[]) {
   return "0x" + merkleTree.getRoot().toString("hex");
 }
 
-export const TOKEN_NAME = "NanCafeToken";
-export const TOKEN_SYMBOL = "NCT";
+export const TOKEN_NAME = "Nan Cupz";
+export const TOKEN_SYMBOL = "Cupz";
 export const MERKLE_ROOT_POTLIST = getMerkelRoot(allowlists.potlist.wallets);
 export const MERKLE_ROOT_WHITELIST = getMerkelRoot(
   allowlists.whitelist.wallets
@@ -24,5 +24,5 @@ export const MAX_SUPPLY = 737; // for instance
 
 // DEPLOYED CONTRACT ADDRESS AND NAME FOR VERIFICATION
 export const DEPLOYED_CONTRACT_ADDRESS =
-  "0x7F4CaDc654058E9fF14b79d1DCdFfA6BC03299f2";
-export const CONTRACT_NAME = "NanCafe";
+  "0xD366ab46e2ff64954de28354380f5C4a32825B4E";
+export const CONTRACT_NAME = "NanCupz";

@@ -12,7 +12,7 @@ import {
 } from "../lib/contractArguments";
 
 async function main() {
-  const NanCafe = await ethers.getContractFactory("NanCafe");
+  const NanCafe = await ethers.getContractFactory("NanCupz");
 
   const nancafe = await NanCafe.deploy(
     TOKEN_NAME,

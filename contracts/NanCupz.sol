@@ -6,7 +6,15 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
-contract NanCafe is ERC721A, Pausable, Ownable {
+/*
+███╗░░██╗░█████╗░███╗░░██╗  ░█████╗░██╗░░░██╗██████╗░███████╗
+████╗░██║██╔══██╗████╗░██║  ██╔══██╗██║░░░██║██╔══██╗╚════██║
+██╔██╗██║███████║██╔██╗██║  ██║░░╚═╝██║░░░██║██████╔╝░░███╔═╝
+██║╚████║██╔══██║██║╚████║  ██║░░██╗██║░░░██║██╔═══╝░██╔══╝░░
+██║░╚███║██║░░██║██║░╚███║  ╚█████╔╝╚██████╔╝██║░░░░░███████╗
+╚═╝░░╚══╝╚═╝░░╚═╝╚═╝░░╚══╝  ░╚════╝░░╚═════╝░╚═╝░░░░░╚══════╝*/
+
+contract NanCupz is ERC721A, Pausable, Ownable {
     // Different types of whitelist mint
     enum whitelistType {
         POTLIST,
@@ -127,6 +135,12 @@ contract NanCafe is ERC721A, Pausable, Ownable {
 
     function setUriSuffix(string calldata _uriSuffix) external onlyOwner {
         uriSuffix = _uriSuffix;
+    }
+
+    function setUnrevealedUri(
+        string calldata _unrevealedUri
+    ) external onlyOwner {
+        unrevealedUri = _unrevealedUri;
     }
 
     // Update max per wallet per allowlist value
